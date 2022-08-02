@@ -40,8 +40,8 @@ class NodeClient(object):
 
     def _filter(self,node_type: NodeType,*node_names: List[str]) -> NodeSet:
         cmds = self.__generate_commands("top","node","-d","-o","json")
-        if node_type != NodeType.AllNodeType and node_type != NodeType.UnknownNodeType:
-            cmds.append("-m=" + node_type.value[0])
+        if node_type not in [NodeType.AllNodeType, NodeType.UnknownNodeType]:
+            cmds.append(f"-m={node_type.value[0]}")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
@@ -52,16 +52,14 @@ class NodeClient(object):
             raise e
 
     def __generate_commands(self,*sub_commands: List[str]) -> List[str]:
-        arena_cmds = list()
-        arena_cmds.append(ARENA_BINARY)
-        for c in sub_commands:
-            arena_cmds.append(c)
+        arena_cmds = [ARENA_BINARY]
+        arena_cmds.extend(iter(sub_commands))
         if self.kubeconfig != "":
-            arena_cmds.append("--config=" + self.kubeconfig)
+            arena_cmds.append(f"--config={self.kubeconfig}")
         if self.namespace != "":
-            arena_cmds.append("--namespace=" + self.namespace)
+            arena_cmds.append(f"--namespace={self.namespace}")
         if self.arena_namespace != "":
-            arena_cmds.append("--arena-namespace=" + self.arena_namespace)
+            arena_cmds.append(f"--arena-namespace={self.arena_namespace}")
         if self.loglevel != "":
-            arena_cmds.append("--loglevel=" + self.loglevel)
+            arena_cmds.append(f"--loglevel={self.loglevel}")
         return arena_cmds

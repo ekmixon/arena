@@ -93,8 +93,7 @@ class TrainingJobInfo(object):
         return self._instances
     
     def __str__(self) -> str:
-        data = dict()
-        data["name"] = self.get_name()
+        data = {"name": self.get_name()}
         data["namespace"] = self.get_namespace()
         data["duration"] = self.get_duration()
         data["type"] = self.get_type().value
@@ -103,10 +102,9 @@ class TrainingJobInfo(object):
         data["priority"] = self.get_priority()
         data["request_gpus"] = self.get_request_gpus()
         data["allocated_gpus"] = self.get_allocated_gpus()
-        instances = list()
+        instances = []
         for instance in self._instances:
-            instance_data = dict()
-            instance_data["owner"] = instance.get_owner()
+            instance_data = {"owner": instance.get_owner()}
             instance_data["owner_type"] = instance.get_owner_type().value
             instance_data["name"] = instance.get_name()
             instance_data["age"] = instance.get_age()
@@ -115,10 +113,9 @@ class TrainingJobInfo(object):
             instance_data["node_ip"] = instance.get_node_ip()
             instance_data["request_gpus"] = instance.get_request_gpus()
             instance_data["is_chief"] = instance.is_chief()
-            metrics = list()
+            metrics = []
             for metric in instance.get_gpu_metrics():
-                metric_data = dict()
-                metric_data["gpu_duty_cycle"] = metric.get_gpu_duty_cycle()
+                metric_data = {"gpu_duty_cycle": metric.get_gpu_duty_cycle()}
                 metric_data["gpu_used_memory"] = metric.get_used_gpu_memory()
                 metric_data["gpu_total_memory"] = metric.get_gpu_total_memory()
                 metrics.append(metric_data)
@@ -208,21 +205,17 @@ class Instance(object):
         return self._gpu_metrics
 
     def get_logs(self,logger: LoggerBuilder) -> None:
-        cmds = list()
-        cmds.append(ARENA_BINARY)
-        cmds.append("logs")
-        cmds.append(self.get_owner())
-        cmds.append("-T=" + self.get_owner_type().value)
-        for opt in logger.get_args():
-            cmds.append(opt)
-        cmds.append("-i=" + self._name)
+        cmds = [ARENA_BINARY, "logs", self.get_owner()]
+        cmds.append(f"-T={self.get_owner_type().value}")
+        cmds.extend(iter(logger.get_args()))
+        cmds.append(f"-i={self._name}")
         kubeconfig = os.getenv("KUBECONFIG")
         if kubeconfig and kubeconfig != "":
-            cmds.append("--config=" + kubeconfig)
-        cmds.append("--namespace=" + self._namespace)
+            cmds.append(f"--config={kubeconfig}")
+        cmds.append(f"--namespace={self._namespace}")
         arena_namespace = os.getenv("ARENA_NAMESPACE")
         if arena_namespace and arena_namespace != "":
-            cmds.append("--arena-namespace=" + arena_namespace)
+            cmds.append(f"--arena-namespace={arena_namespace}")
         try:
             status,stdout,stderr = Command(*cmds).run_with_communicate(logger.get_accepter())
             if status != 0:
@@ -267,7 +260,7 @@ def generate_training_job_info(data) -> TrainingJobInfo:
     job_info.set_priority(data["priority"])
     job_info.set_request_gpus(data["requestGPUs"])
     job_info.set_allocated_gpus(data["allocatedGPUs"])
-    instances = list()
+    instances = []
     for i in data["instances"]:
         instance = Instance()
         instance.set_owner(job_info.get_name())
@@ -280,7 +273,7 @@ def generate_training_job_info(data) -> TrainingJobInfo:
         instance.set_node_ip(i["nodeIP"])
         instance.set_is_chief(i["chief"])
         instance.set_request_gpus(i["requestGPUs"])
-        gpu_metrics = dict()
+        gpu_metrics = {}
         for key,value in i["gpuMetrics"].items():
             gpu_metric = GPUMetric()
             gpu_metric.set_gpu_duty_cycle(value["gpuDutyCycle"])

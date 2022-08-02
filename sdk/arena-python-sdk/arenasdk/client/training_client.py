@@ -29,7 +29,8 @@ class TrainingClient(object):
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
-                err_message = "the job {} is already exist, please delete it first.".format(job.get_name())
+                err_message = f"the job {job.get_name()} is already exist, please delete it first."
+
                 if stdout.find(err_message) != -1 or stderr.find(err_message) != -1:
                     raise ArenaException(ArenaErrorType.TrainingJobExistError,stdout + stderr)
                 else:
@@ -40,13 +41,17 @@ class TrainingClient(object):
     
     def list(self,job_type: TrainingJobType,all_namespaces: bool) -> List[TrainingJobInfo]:
         def convert(json_object):
-            job_infos = list()
+            job_infos = []
             for obj in json_object:
                 job_infos.append(generate_training_job_info(obj))
             return job_infos
+
         cmds = self.__generate_commands("list")
-        if job_type != TrainingJobType.AllTrainingJob and job_type != TrainingJobType.UnknownTrainingJob:
-            cmds.append("--type=" + job_type.value)
+        if job_type not in [
+            TrainingJobType.AllTrainingJob,
+            TrainingJobType.UnknownTrainingJob,
+        ]:
+            cmds.append(f"--type={job_type.value}")
         if all_namespaces:
             cmds.append("-A")
         cmds.append("-o")
@@ -62,14 +67,18 @@ class TrainingClient(object):
     def get(self,job_name: str,job_type: TrainingJobType) -> TrainingJobInfo:
         cmds = self.__generate_commands("get")
         cmds.append(job_name)
-        if job_type != TrainingJobType.AllTrainingJob and job_type != TrainingJobType.UnknownTrainingJob:
-            cmds.append("--type=" + job_type.value)
+        if job_type not in [
+            TrainingJobType.AllTrainingJob,
+            TrainingJobType.UnknownTrainingJob,
+        ]:
+            cmds.append(f"--type={job_type.value}")
         cmds.append("-o")
         cmds.append("json")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
-                err_message = "Not found training job {} in namespace {},please use 'arena submit' to create it.".format(job_name,self.namespace)
+                err_message = f"Not found training job {job_name} in namespace {self.namespace},please use 'arena submit' to create it."
+
                 if stdout.find(err_message) != -1 or stderr.find(err_message) != -1:
                     return None
                 else:
@@ -82,8 +91,11 @@ class TrainingClient(object):
     def delete(self, job_name: str,job_type: TrainingJobType) -> str:
         cmds = self.__generate_commands("delete")
         cmds.append(job_name)
-        if job_type != TrainingJobType.AllTrainingJob and job_type != TrainingJobType.UnknownTrainingJob:
-            cmds.append("--type=" + job_type.value)
+        if job_type not in [
+            TrainingJobType.AllTrainingJob,
+            TrainingJobType.UnknownTrainingJob,
+        ]:
+            cmds.append(f"--type={job_type.value}")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
@@ -94,7 +106,7 @@ class TrainingClient(object):
     
     def prune(self,since: str,all_namespaces: bool) -> str:
         cmds = self.__generate_commands("prune")
-        cmds.append("--since=" + since)
+        cmds.append(f"--since={since}")
         if all_namespaces:
             cmds.append("-A")
         try:
@@ -135,17 +147,15 @@ class TrainingClient(object):
             raise e        
          
     def __generate_commands(self,*sub_commands: List[str]) -> List[str]:
-        arena_cmds = list()
-        arena_cmds.append(ARENA_BINARY)
-        for c in sub_commands:
-            arena_cmds.append(c)
+        arena_cmds = [ARENA_BINARY]
+        arena_cmds.extend(iter(sub_commands))
         if self.kubeconfig != "":
-            arena_cmds.append("--config=" + self.kubeconfig)
+            arena_cmds.append(f"--config={self.kubeconfig}")
         if self.namespace != "":
-            arena_cmds.append("--namespace=" + self.namespace)
+            arena_cmds.append(f"--namespace={self.namespace}")
         if self.arena_namespace != "":
-            arena_cmds.append("--arena-namespace=" + self.arena_namespace)
+            arena_cmds.append(f"--arena-namespace={self.arena_namespace}")
         if self.loglevel != "":
-            arena_cmds.append("--loglevel=" + self.loglevel)
+            arena_cmds.append(f"--loglevel={self.loglevel}")
         return arena_cmds
         		

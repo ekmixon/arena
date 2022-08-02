@@ -17,18 +17,21 @@ class JobBuilder(metaclass=abc.ABCMeta):
     def __init__(self,job_type: TrainingJobType):
         self._job_type: TrainingJobType = job_type
         self._job_name = ""
-        self._options: List[Field] = list()
+        self._options: List[Field] = []
         self._command = ""
         
     def build(self) -> TrainingJob:
-        args = list()
+        args = []
         try:
             for field in self._options:
                 if not isinstance(field,Field):
-                    raise ArenaException(ArenaErrorType.Unknown,"the type of option {} is not Field".format(field))
+                    raise ArenaException(
+                        ArenaErrorType.Unknown,
+                        f"the type of option {field} is not Field",
+                    )
+
                 field.validate()
-                for opt in field.options():
-                    args.append(opt)
+                args.extend(iter(field.options()))
             return TrainingJob(self._job_name,self._job_type,args,self._command)
         except ArenaException as e:
             raise e 

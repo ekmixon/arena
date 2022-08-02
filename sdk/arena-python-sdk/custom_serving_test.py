@@ -21,7 +21,7 @@ def main():
             output = client.serving().submit(job)
             print(output)
         else:
-            print("the job {} has been created,skip to create it".format(jobName))
+            print(f"the job {jobName} has been created,skip to create it")
         jobInfo = client.serving().get(jobName,jobType,version)
         logger = LoggerBuilder().with_accepter(sys.stdout).with_since("5m")
         jobInfo.get_instances()[0].get_logs(logger)

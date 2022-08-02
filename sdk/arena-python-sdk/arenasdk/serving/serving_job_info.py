@@ -100,8 +100,7 @@ class ServingJobInfo(object):
         return self._ip
     
     def __str__(self) -> str:
-        data = dict()
-        data["name"] = self.get_name()
+        data = {"name": self.get_name()}
         data["namespace"] = self.get_namespace()
         data["duration"] = self.get_duration()
         data["type"] = self.get_type().value[0]
@@ -111,18 +110,16 @@ class ServingJobInfo(object):
         data["ip"] = self.get_ip()
         data["request_gpus"] = self.get_request_gpus()
         data["request_gpu_memory"] = self.get_request_gpu_memory()
-        endpoints = list()
+        endpoints = []
         for e in self.get_endpoints():
-            endpoint = dict()
-            endpoint["name"] = e.get_name()
+            endpoint = {"name": e.get_name()}
             endpoint["port"] =  e.get_port()
             endpoint["node_port"] = e.get_node_port()
             endpoints.append(endpoint)
         data["endpoints"] = endpoints
-        instances = list()
+        instances = []
         for i in self.get_instances():
-            instance = dict()
-            instance["name"] = i.get_name()
+            instance = {"name": i.get_name()}
             instance["age"] = i.get_age()
             instance["namespace"] = i.get_namespace()
             instance["status"] = i.get_status()
@@ -247,23 +244,18 @@ class Instance(object):
         return self._request_gpu_memory
     
     def get_logs(self,logger: LoggerBuilder) -> None:
-        cmds = list()
-        cmds.append(ARENA_BINARY)
-        cmds.append("serve")
-        cmds.append("logs")
-        cmds.append(self.get_owner())
-        cmds.append("-T=" + self.get_owner_type().value[0])
-        cmds.append("--version=" + self.get_owner_version())
-        for opt in logger.get_args():
-            cmds.append(opt)
-        cmds.append("-i=" + self._name)
+        cmds = [ARENA_BINARY, "serve", "logs", self.get_owner()]
+        cmds.append(f"-T={self.get_owner_type().value[0]}")
+        cmds.append(f"--version={self.get_owner_version()}")
+        cmds.extend(iter(logger.get_args()))
+        cmds.append(f"-i={self._name}")
         kubeconfig = os.getenv("KUBECONFIG")
         if kubeconfig and kubeconfig != "":
-            cmds.append("--config=" + kubeconfig)
-        cmds.append("--namespace=" + self._namespace)
+            cmds.append(f"--config={kubeconfig}")
+        cmds.append(f"--namespace={self._namespace}")
         arena_namespace = os.getenv("ARENA_NAMESPACE")
         if arena_namespace and arena_namespace != "":
-            cmds.append("--arena-namespace=" + arena_namespace)
+            cmds.append(f"--arena-namespace={arena_namespace}")
         try:
             status,stdout,stderr = Command(*cmds).run_with_communicate(logger.get_accepter())
             if status != 0:
@@ -308,7 +300,7 @@ def generate_serving_job_info(data) -> ServingJobInfo:
     job_info.set_ip(data["ip"])
     job_info.set_request_gpus(data["requestGPUs"])
     job_info.set_request_gpu_memory(data["requestGPUMemory"])
-    instances = list()
+    instances = []
     for i in data["instances"]:
         instance = Instance()
         instance.set_owner(job_info.get_name())
@@ -328,7 +320,7 @@ def generate_serving_job_info(data) -> ServingJobInfo:
         instance.set_request_gpu_memory(i["requestGPUMemory"])
         instances.append(instance)
     job_info.set_instances(instances)
-    endpoints = list()
+    endpoints = []
     for e in data["endpoints"]:
         endpoint = Endpoint()
         endpoint.set_name(e["name"])

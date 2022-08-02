@@ -77,7 +77,7 @@ def build_gpu_topology_nodes(data: dict) -> GPUTopologyNode:
     cls.set_total_gpus(data["totalGPUs"])
     cls.set_allocated_gpus(data["allocatedGPUs"])
     cls.set_unhealthy_gpus(data["unhealthyGPUs"])
-    instances = list()
+    instances = []
     for i in data["instances"]:
         instance = GPUTopologyNodePod()
         instance.set_name(i["name"])
@@ -87,7 +87,7 @@ def build_gpu_topology_nodes(data: dict) -> GPUTopologyNode:
         instance.set_visible_gpus(i["visibleGPUs"])
         instances.append(instance)
     cls.set_instances(instances)
-    devices = list()
+    devices = []
     for d in data["devices"]:
         device = GPUTopologyNodeDevice()
         device.set_id(d["gpuIndex"])
@@ -95,7 +95,7 @@ def build_gpu_topology_nodes(data: dict) -> GPUTopologyNode:
         device.set_healthy(d["healthy"])
         devices.append(device)
     cls.set_devices(devices)
-    gpu_metrics = list()
+    gpu_metrics = []
     for g in data["gpuMetrics"]:
         gpu_metric = AdvancedGPUMetric()
         gpu_metric.set_id(g["id"])
@@ -105,7 +105,7 @@ def build_gpu_topology_nodes(data: dict) -> GPUTopologyNode:
         gpu_metric.set_total_gpu_memory(g["totalGPUMemory"])
         gpu_metric.set_used_gpu_memory(g["usedGPUMemory"])
         gpu_metrics.append(gpu_metric)
-    cls.set_gpu_metrics(gpu_metrics) 
+    cls.set_gpu_metrics(gpu_metrics)
     cls.set_linktype_matrix(data["gpuTopology"]["linkMatrix"])
     cls.set_bandwidth_matrix(data["gpuTopology"]["bandwidthMatrix"])
     return cls

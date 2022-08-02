@@ -17,7 +17,7 @@ class Command(object):
 	def run(self,timeout_sec=-1):
 		cmdstr = ' '.join(self.cmd)
 		logger.debug("execute command: [%s]",cmdstr)
-		if timeout_sec == -1 or timeout_sec == 0:
+		if timeout_sec in [-1, 0]:
 			return self.run_without_timeout(cmdstr)
 		return self.run_with_timeout(cmdstr,timeout_sec)
 
@@ -55,7 +55,10 @@ class Command(object):
 
 		except subprocess.TimeoutExpired:
 			self.process.kill()
-			err_msg = "timeout for executing command(timeout="+ str(timeout_sec) + "s): ["	+ cmdstr + "]"	
+			err_msg = (
+				f"timeout for executing command(timeout={str(timeout_sec)}s): [{cmdstr}]"
+			)
+
 			return 124,"",err_msg 
 		
 def read_yaml_or_json_file(target_file,fmt=""):
@@ -64,7 +67,7 @@ def read_yaml_or_json_file(target_file,fmt=""):
 			name,ext = os.path.splitext(target_file)
 			fmt = ext
 		with open(target_file,"r") as f:
-			if fmt == ".yaml" or fmt == ".yml":
+			if fmt in [".yaml", ".yml"]:
 				return 0,yaml.load(f,Loader=yaml.FullLoader)
 			elif fmt == ".json":
 				return 0,json.load(f)

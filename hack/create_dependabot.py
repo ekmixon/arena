@@ -2,59 +2,66 @@ import yaml
 import collections
 from pathlib import Path
 
-dependabot = {}
-dependabot['version'] = 2
-dependabot['updates'] = []
+dependabot = {'version': 2, 'updates': []}
 ignored_folders = ['node_modules', 'dist', '.git', 'deprecated']
 
 def get_owners(path):
     while not Path(path/'OWNERS').is_file():
         path = path.parent.absolute()
     with open(path/'OWNERS') as owner_file:
-        owners = yaml.load(owner_file)
-        return owners
+        return yaml.load(owner_file)
 
 def get_docker_paths():
     dockerfile_list = list(repo_path.glob('**/*ockerfile*'))
     docker_clean_list = []
     for dockerfile in dockerfile_list:
-        if all(x not in str(dockerfile) for x in ignored_folders):
-            if dockerfile.parents[0] not in docker_clean_list:
-                docker_clean_list.append(dockerfile.parents[0])
+        if (
+            all(x not in str(dockerfile) for x in ignored_folders)
+            and dockerfile.parents[0] not in docker_clean_list
+        ):
+            docker_clean_list.append(dockerfile.parents[0])
     return docker_clean_list
 
 def get_npm_paths():
     npm_list = list(repo_path.glob('**/package*.json'))
     npm_clean_list = []
     for npm_file in npm_list:
-        if all(x not in str(npm_file) for x in ignored_folders):
-            if npm_file.parents[0] not in npm_clean_list:
-                npm_clean_list.append(npm_file.parents[0])
+        if (
+            all(x not in str(npm_file) for x in ignored_folders)
+            and npm_file.parents[0] not in npm_clean_list
+        ):
+            npm_clean_list.append(npm_file.parents[0])
     return npm_clean_list
 
 def get_pip_paths():
     pip_list = list(repo_path.glob('**/*requirements.txt'))
     pip_clean_list = []
     for pip_file in pip_list:
-        if all(x not in str(pip_file) for x in ignored_folders):
-            if pip_file.parents[0] not in pip_clean_list:
-                pip_clean_list.append(pip_file.parents[0])
+        if (
+            all(x not in str(pip_file) for x in ignored_folders)
+            and pip_file.parents[0] not in pip_clean_list
+        ):
+            pip_clean_list.append(pip_file.parents[0])
     return pip_clean_list
 
 def get_go_paths():
     go_list = list(repo_path.glob('**/go.*'))
     go_clean_list = []
     for go_file in go_list:
-        if all(x not in str(go_file) for x in ignored_folders):
-            if go_file.parents[0] not in go_clean_list:
-                go_clean_list.append(go_file.parents[0])
+        if (
+            all(x not in str(go_file) for x in ignored_folders)
+            and go_file.parents[0] not in go_clean_list
+        ):
+            go_clean_list.append(go_file.parents[0])
     return go_clean_list
 
 def append_updates(ecosystem, directory, assignees, reviewers=None):
-    config = {}
-    config['package-ecosystem'] = ecosystem
-    config['directory'] = directory
-    config['schedule']= {}
+    config = {
+        'package-ecosystem': ecosystem,
+        'directory': directory,
+        'schedule': {},
+    }
+
     config['schedule']['interval'] = 'daily'
     config['open-pull-requests-limit'] = 10
     config['assignees'] = assignees

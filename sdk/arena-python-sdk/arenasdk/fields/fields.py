@@ -21,12 +21,14 @@ class StringField(Field):
         
     def validate(self):
         if not self._flag or self._value == "":
-            raise ArenaException(ArenaErrorType.ValidateArgsError,"failed to validate flag {},value is null".format(self._flag))
+            raise ArenaException(
+                ArenaErrorType.ValidateArgsError,
+                f"failed to validate flag {self._flag},value is null",
+            )
+
         return True
     def options(self):
-        arena_options = list()
-        arena_options.append(self._flag + "=" + self._value)
-        return arena_options
+        return [f"{self._flag}={self._value}"]
 
 
 class BoolField(Field):
@@ -38,9 +40,7 @@ class BoolField(Field):
         return True 
     
     def options(self):
-        arena_options = list()
-        arena_options.append(self._flag)
-        return arena_options
+        return [self._flag]
 
 class StringListField(Field):
     def __init__(self,flag,values):
@@ -50,14 +50,15 @@ class StringListField(Field):
         
     def validate(self):
         if not self._values or len(self._values) == 0:
-            raise ArenaException(ArenaErrorType,"failed to validate flag {},values are null".format(self._flag))
+            raise ArenaException(
+                ArenaErrorType,
+                f"failed to validate flag {self._flag},values are null",
+            )
+
         return True
     
     def options(self):
-        arena_options = list()
-        for value in self._values:
-            arena_options.append(self._flag + "=" + value)
-        return arena_options
+        return [f"{self._flag}={value}" for value in self._values]
 
 class StringMapField(Field):
     def __init__(self,flag,values,join_flag="="):
@@ -67,10 +68,14 @@ class StringMapField(Field):
         self._join_flag = join_flag
     def validate(self):
         if not self._values or len(self._values) == 0:
-            raise ArenaException(ArenaErrorType,"failed to validate flag {},values are null".format(self._flag))
+            raise ArenaException(
+                ArenaErrorType,
+                f"failed to validate flag {self._flag},values are null",
+            )
+
         return True
     def options(self):
-        arena_options = list()
-        for key,value in self._values.items():
-            arena_options.append(self._flag + "=" + key + self._join_flag + value)
-        return arena_options 
+        return [
+            f"{self._flag}={key}{self._join_flag}{value}"
+            for key, value in self._values.items()
+        ] 

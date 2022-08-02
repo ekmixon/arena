@@ -13,7 +13,7 @@ class ArenaException(Exception):
         self.err_msg = err_msg
     
     def __str__(self):
-        return '''ArenaException[ErrorType: {},ErrorMessage: {}]'''.format(self.err_type.name,self.err_msg)
+        return f'''ArenaException[ErrorType: {self.err_type.name},ErrorMessage: {self.err_msg}]'''
     
     def __repr__(self):
-        return '''ArenaException[ErrorType: {},ErrorMessage: {}]'''.format(self.err_type.name,self.err_msg)
+        return f'''ArenaException[ErrorType: {self.err_type.name},ErrorMessage: {self.err_msg}]'''

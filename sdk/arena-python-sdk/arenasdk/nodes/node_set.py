@@ -49,21 +49,27 @@ class NodeSet(object):
 def build_nodes(data) -> NodeSet:
     cls = NodeSet()
     logger.debug("get all node informations: %s",data)
-    normal_nodes = list()
-    for node_info in data["normalNodes"]:
-        normal_nodes.append(build_normal_nodes(node_info))
+    normal_nodes = [
+        build_normal_nodes(node_info) for node_info in data["normalNodes"]
+    ]
+
     cls.set_normal_nodes(normal_nodes)
-    gpu_topology_nodes = list()
-    for node_info in data["gpuTopologyNodes"]:
-        gpu_topology_nodes.append(build_gpu_topology_nodes(node_info))
+    gpu_topology_nodes = [
+        build_gpu_topology_nodes(node_info)
+        for node_info in data["gpuTopologyNodes"]
+    ]
+
     cls.set_gpu_topology_nodes(gpu_topology_nodes)
-    gpu_exclusive_nodes = list()
-    for node_info in data["gpuExclusiveNodes"]:
-        gpu_exclusive_nodes.append(build_gpu_exclusive_nodes(node_info))
+    gpu_exclusive_nodes = [
+        build_gpu_exclusive_nodes(node_info)
+        for node_info in data["gpuExclusiveNodes"]
+    ]
+
     cls.set_gpu_exclusive_nodes(gpu_exclusive_nodes)
-    gpu_share_nodes = list()
-    for node_info in data["gpuShareNodes"]:
-        gpu_share_nodes.append(build_gpushare_nodes(node_info))
+    gpu_share_nodes = [
+        build_gpushare_nodes(node_info) for node_info in data["gpuShareNodes"]
+    ]
+
     cls.set_gpushare_nodes(gpu_share_nodes)
     return cls
             

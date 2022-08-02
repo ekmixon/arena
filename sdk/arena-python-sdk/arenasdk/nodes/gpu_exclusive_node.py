@@ -57,7 +57,7 @@ def build_gpu_exclusive_nodes(data: dict) -> GPUExclusiveNode:
     cls.set_total_gpus(data["totalGPUs"])
     cls.set_allocated_gpus(data["allocatedGPUs"])
     cls.set_unhealthy_gpus(data["unhealthyGPUs"])
-    instances = list()
+    instances = []
     for i in data["instances"]:
         instance = GPUExclusiveNodePod()
         instance.set_name(i["name"])
@@ -65,7 +65,7 @@ def build_gpu_exclusive_nodes(data: dict) -> GPUExclusiveNode:
         instance.set_request_gpus(i["requestGPUs"])
         instances.append(instance)
     cls.set_instances(instances)
-    gpu_metrics = list()
+    gpu_metrics = []
     for g in data["gpuMetrics"]:
         gpu_metric = AdvancedGPUMetric()
         gpu_metric.set_id(g["id"])

@@ -80,7 +80,7 @@ def build_gpushare_nodes(data: dict) -> GPUShareNode:
     cls.set_status(data["status"])
     cls.set_role(data["role"])
     cls.set_node_type(data["type"])
-    devices = list()
+    devices = []
     for d in data["devices"]:
         device = GPUShareNodeDevice()
         device.set_id(d["id"])
@@ -88,7 +88,7 @@ def build_gpushare_nodes(data: dict) -> GPUShareNode:
         device.set_total_gpu_memory(d["totalGPUMemory"])
         devices.append(device)
     cls.set_devices(devices)
-    instances = list()
+    instances = []
     for i in data["instances"]:
         instance = GPUShareNodePod()
         instance.set_name(i["name"])
@@ -96,7 +96,7 @@ def build_gpushare_nodes(data: dict) -> GPUShareNode:
         instance.set_request_gpu_memory(i["requestGPUMemory"])
         instance.set_allocation(i["allocation"])
         instances.append(instance)
-    gpu_metrics = list()
+    gpu_metrics = []
     for g in data["gpuMetrics"]:
         gpu_metric = AdvancedGPUMetric()
         gpu_metric.set_id(g["id"])
@@ -106,7 +106,7 @@ def build_gpushare_nodes(data: dict) -> GPUShareNode:
         gpu_metric.set_total_gpu_memory(g["totalGPUMemory"])
         gpu_metric.set_used_gpu_memory(g["usedGPUMemory"])
         gpu_metrics.append(gpu_metric)
-    cls.set_gpu_metrics(gpu_metrics)    
+    cls.set_gpu_metrics(gpu_metrics)
     cls.set_instances(instances)
     return cls 
     

@@ -29,7 +29,8 @@ class ServingClient(object):
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
-                err_message = "the job {} is already exist, please delete it first.".format(job.get_name())
+                err_message = f"the job {job.get_name()} is already exist, please delete it first."
+
                 if stdout.find(err_message) != -1 or stderr.find(err_message) != -1:
                     raise ArenaException(ArenaErrorType.TrainingJobExistError,stdout + stderr)
                 else:
@@ -40,13 +41,17 @@ class ServingClient(object):
     
     def list(self,job_type: ServingJobType,all_namespaces: bool) -> List[TrainingJobInfo]:
         def convert(json_object):
-            job_infos = list()
+            job_infos = []
             for obj in json_object:
                 job_infos.append(generate_serving_job_info(obj))
             return job_infos
+
         cmds = self.__generate_commands("list")
-        if job_type != ServingJobType.AllServingJob and job_type != ServingJobType.UnknownServingJob:
-            cmds.append("--type=" + job_type.value)
+        if job_type not in [
+            ServingJobType.AllServingJob,
+            ServingJobType.UnknownServingJob,
+        ]:
+            cmds.append(f"--type={job_type.value}")
         if all_namespaces:
             cmds.append("-A")
         cmds.append("-o")
@@ -62,16 +67,19 @@ class ServingClient(object):
     def get(self,job_name: str,job_type: ServingJobType,version: str) -> TrainingJobInfo:
         cmds = self.__generate_commands("serve","get")
         cmds.append(job_name)
-        if job_type != ServingJobType.AllServingJob and job_type != ServingJobType.UnknownServingJob:
-            cmds.append("--type=" + job_type.value[0])
+        if job_type not in [
+            ServingJobType.AllServingJob,
+            ServingJobType.UnknownServingJob,
+        ]:
+            cmds.append(f"--type={job_type.value[0]}")
         if version != "":
-            cmds.append("--version=" + version)
+            cmds.append(f"--version={version}")
         cmds.append("-o")
         cmds.append("json")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
-                err_message = "Not found serving job {}".format(job_name)
+                err_message = f"Not found serving job {job_name}"
                 if stdout.find(err_message) != -1 or stderr.find(err_message) != -1:
                     return None
                 else:
@@ -84,10 +92,13 @@ class ServingClient(object):
     def delete(self, job_name: str,job_type: ServingJobType,version: str) -> str:
         cmds = self.__generate_commands("serve","delete")
         cmds.append(job_name)
-        if job_type != TrainingJobType.AllTrainingJob and job_type != TrainingJobType.UnknownTrainingJob:
-            cmds.append("--type=" + job_type.value[0])
+        if job_type not in [
+            TrainingJobType.AllTrainingJob,
+            TrainingJobType.UnknownTrainingJob,
+        ]:
+            cmds.append(f"--type={job_type.value[0]}")
         if version != "":
-            cmds.append("--version=" + version)
+            cmds.append(f"--version={version}")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
@@ -98,9 +109,9 @@ class ServingClient(object):
 
     def traffic_router_split(self,job_name: str,job_type: ServingJobType,version_weights: Dict[str,int]):
         cmds = self.__generate_commands("serve","traffic-router-split")
-        cmds.append("--name=" + job_name)
+        cmds.append(f"--name={job_name}")
         for version,weight in version_weights.items():
-            cmds.append("-v=" + version + ":" + str(weight))
+            cmds.append(f"-v={version}:{str(weight)}")
         try:
             status,stdout,stderr = Command(*cmds).run()
             if status != 0:
@@ -111,17 +122,15 @@ class ServingClient(object):
         
          
     def __generate_commands(self,*sub_commands: List[str]) -> List[str]:
-        arena_cmds = list()
-        arena_cmds.append(ARENA_BINARY)
-        for c in sub_commands:
-            arena_cmds.append(c)
+        arena_cmds = [ARENA_BINARY]
+        arena_cmds.extend(iter(sub_commands))
         if self.kubeconfig != "":
-            arena_cmds.append("--config=" + self.kubeconfig)
+            arena_cmds.append(f"--config={self.kubeconfig}")
         if self.namespace != "":
-            arena_cmds.append("--namespace=" + self.namespace)
+            arena_cmds.append(f"--namespace={self.namespace}")
         if self.arena_namespace != "":
-            arena_cmds.append("--arena-namespace=" + self.arena_namespace)
+            arena_cmds.append(f"--arena-namespace={self.arena_namespace}")
         if self.loglevel != "":
-            arena_cmds.append("--loglevel=" + self.loglevel)
+            arena_cmds.append(f"--loglevel={self.loglevel}")
         return arena_cmds
         		

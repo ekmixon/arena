@@ -18,10 +18,14 @@ class TrainingJobType(Enum):
     def convert(cls,alias):
         if alias == "":
             return TrainingJobType.AllTrainingJob
-        for name,value in TrainingJobType.__members__.items():
-            if alias == value.value:
-                return value 
-        return TrainingJobType.UnknownTrainingJob
+        return next(
+            (
+                value
+                for name, value in TrainingJobType.__members__.items()
+                if alias == value.value
+            ),
+            TrainingJobType.UnknownTrainingJob,
+        )
 
 
 class ServingJobType(Enum):
@@ -94,7 +98,11 @@ class TrainingJobStatus(Enum):
     UnknownTrainingJobStatus = "UNKNOWN"
     @classmethod
     def convert(cls,alias):
-        for name,value in TrainingJobStatus.__members__.items():
-            if alias == value.value:
-                return value 
-        return TrainingJobStatus.UnknownTrainingJobStatus
+        return next(
+            (
+                value
+                for name, value in TrainingJobStatus.__members__.items()
+                if alias == value.value
+            ),
+            TrainingJobStatus.UnknownTrainingJobStatus,
+        )

@@ -18,14 +18,14 @@ def main():
     try:
         # build the training job 
         job = MPIJobBuilder().with_name(job_name).with_workers(1).enable_tensorboard().with_image("registry.cn-hangzhou.aliyuncs.com/tensorflow-samples/horovod:0.13.11-tf1.10.0-torch0.4.0-py3.5").with_command('''"sh -c -- 'mpirun python /benchmarks/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py --model resnet101 --batch_size 64     --variable_update horovod --train_dir=/training_logs --summary_verbosity=3 --save_summaries_steps=10'"''').build()
-        # if training job is not existed,create it 
+        # if training job is not existed,create it
         if not client.training().get(job_name,job_type):
             output = client.training().submit(job)
             print(output)
         else:
-            print("the job {} has been created,skip to create it".format(job_name))
+            print(f"the job {job_name} has been created,skip to create it")
         count = 0
-        # waiting training job to be running 
+        # waiting training job to be running
         while True:
             if count > 160:
                 raise Exception("timeout for waiting job to be running")
@@ -35,13 +35,13 @@ def main():
                 count = count + 1
                 time.sleep(5)
                 continue
-            print("current status is {} of job {}".format(jobInfo.get_status().value,job_name))
+            print(f"current status is {jobInfo.get_status().value} of job {job_name}")
             break
         # get the training job logs 
         logger = LoggerBuilder().with_accepter(sys.stdout).with_follow().with_since("5m")
         jobInfo.get_instances()[0].get_logs(logger)
         # display the training job information
-        print(str(jobInfo))
+        print(jobInfo)
         # delete the training job 
         client.training().delete(job_name,job_type)
     except ArenaException as e:
